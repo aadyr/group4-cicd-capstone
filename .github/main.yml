@@ -1,0 +1,109 @@
+name: CICD for Serverless Application
+run-name: ${{ github.actor }} is doing CICD for serverless application
+
+on:
+  push:
+    branches: [ dev , main]
+
+jobs:
+  pre-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "The job is automatically triggered by a ${{ github.event_name }} event."
+  install-dependencies:
+    runs-on: ubuntu-latest
+    needs: pre-deploy
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Run installation of dependencies commands
+        run: npm install
+  unit-testing:
+    runs-on: ubuntu-latest
+    needs: install-dependencies
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Run installation of dependencies commands
+        run: npm install # all the module require is in package.json
+      - name: Run unit testing commands
+        run: npm test
+  package-audit:
+    runs-on: ubuntu-latest
+    needs: unit-testing
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Run installation of dependencies commands
+        run: npm install # all the module require is in package.json
+      - name: Run unit testing commands
+        run: npm audit
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        env:
+         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+         command: monitor
+
+  deploy-dev:
+    runs-on: ubuntu-latest
+    needs: package-audit
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+         node-version: ${{ matrix.node-version }}
+      - run: npm ci
+      - name: serverless deploy
+        uses: serverless/github-action@v3.2
+        with:
+          args: deploy --stage=dev
+        env:
+             AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
+             AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Sleep for 60 seconds #wait for lambda to be deploy
+        run: sleep 60
+  zap_scan:
+    runs-on: ubuntu-latest
+    needs: deploy-dev
+    name: OWASP Scan the webapplication
+    steps:
+      - name: Show API Gateway URL
+        run: echo "API_Gateway_URL:" $api_gateway_url 
+      - name: ZAP Scan
+        uses: zaproxy/action-api-scan@v0.5.0
+        with:
+          target: https://9w2itn60t2.execute-api.ap-southeast-1.amazonaws.com    
+  merge:
+    runs-on: ubuntu-latest
+    needs: [zap_scan]
+    steps:
+      - uses: actions/checkout@master
+      - name: Merge dev -> Main
+        uses: devmasx/merge-branch@v1.4.0
+        with:
+          type: now
+          target_branch: main
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+  deploy-production: #using new IAM user as g4p
+    runs-on: ubuntu-latest
+    needs: merge
+    steps:
+      - uses: actions/checkout@v3
+        with:
+         ref: refs/heads/main
+      - run: git checkout main  
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+         node-version: ${{ matrix.node-version }}
+      - run: npm ci
+      - name: serverless deploy
+        uses: serverless/github-action@v3.2
+        with:
+          args: deploy --stage=prod
+        env:
+             AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
+             AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
