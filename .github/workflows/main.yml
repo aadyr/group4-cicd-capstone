@@ -3,9 +3,9 @@ run-name: ${{ github.actor }} is doing CICD for serverless application
 
 on:
   push:
-    branches: [*]
+    branches: ["*"]
   pull_request:
-    branches: [*]
+    branches: ["*"]
 
 jobs:
   pre-deploy:
