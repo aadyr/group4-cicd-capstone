@@ -263,6 +263,148 @@ deploy-prod: #using new IAM user as g4p
              AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 ```
 
+Last Line
+
+
+### Global Configuration
+
+**name: CICD for Serverless Application**
+1. `name:` - Declares a key in YAML. This is the name of your workflow.
+2. `CICD for Serverless Application` - This is the name of the workflow.
+3. Purpose: To give a descriptive name for the workflow.
+4. Execution: None, it's a descriptor.
+5. Generated files: None.
+6. Usage: To define the name of a workflow that appears in the GitHub Actions UI.
+
+**run-name: ${{ github.actor }} is doing CICD for serverless application**
+1. `run-name:` - Specifies the name of each individual run of the workflow.
+2. `${{ github.actor }}` - Refers to the username of the person who initiated the event triggering this action.
+3. Purpose: To provide a specific name for individual workflow runs.
+4. Execution: Each run will have a name like "user123 is doing CICD for serverless application."
+5. Generated files: None.
+6. Usage: For better logging and identification of workflow runs.
+
+### Event Triggers
+
+**on:**
+1. `on:` - Declares the events that will trigger the workflow.
+2. Purpose: To specify when this workflow should run.
+3. Execution: Workflow waits for the specified event.
+4. Generated files: None.
+5. Usage: To define the events that will initiate the workflow.
+
+**push:**
+1. `push:` - An event that triggers when commits are pushed.
+2. Purpose: To initiate the workflow on a push event.
+3. Execution: Workflow triggers when there's a push to the specified branches.
+4. Generated files: None.
+5. Usage: Commonly used to initiate workflows upon code pushes.
+
+**branches: [dev, main]**
+1. `branches:` - Specifies which branches this event applies to.
+2. `[dev, main]` - Only triggers for `dev` and `main` branches.
+3. Purpose: To narrow down the push event to specific branches.
+4. Execution: Workflow will start if a push event happens on either `dev` or `main` branches.
+5. Generated files: None.
+6. Usage: To selectively run workflows for specific branches.
+
+### Job Definitions
+
+Note: The pattern here is repetitive for each job. Each job has `runs-on`, which defines the type of runner the job will execute on. `steps` then define a series of commands/actions the job will perform.
+
+**jobs:**
+1. `jobs:` - Begins the definition of all jobs in the workflow.
+2. Purpose: To group and list all the jobs for the workflow.
+3. Execution: None, it's a structure.
+4. Generated files: None.
+5. Usage: Always used in GitHub Actions to define the set of jobs.
+
+**pre-deploy:**
+1. `pre-deploy:` - Name of the job.
+2. Purpose: To define a specific job with its steps.
+3. Execution: None yet, it's a descriptor.
+4. Generated files: None.
+5. Usage: Each job in a workflow is named, and this is the name of this job.
+
+**runs-on: ubuntu-latest**
+1. `runs-on:` - Specifies where the job runs.
+2. `ubuntu-latest` - The latest version of the Ubuntu runner.
+3. Purpose: To define which type of runner to use.
+4. Execution: The job will use an Ubuntu virtual machine.
+5. Generated files: None.
+6. Usage: To specify the environment where the job will be executed.
+
+(For brevity, I will cover unique steps, and not repeat explanations for shared steps.)
+
+### Job: pre-deploy
+
+**- run: echo "The job is automatically triggered by a ${{ github.event_name }} event."**
+1. `- run:` - Executes the following shell command.
+2. `echo` - Shell command to print something.
+3. `${{ github.event_name }}` - Dynamic value that provides the name of the event that triggered the workflow.
+4. Purpose: To print a message telling which event triggered this job.
+5. Execution: The message is displayed in the workflow logs.
+6. Generated files: None.
+7. Usage: For logging/debugging purposes.
+
+### Job: install-dependencies
+
+**- name: Check out repository code**
+1. `- name:` - Provides a friendly name for the following step.
+2. `Check out repository code` - A human-readable name for this step.
+3. Purpose: To describe the step for better logging/visibility.
+4. Execution: None, it's a descriptor.
+5. Generated files: None.
+6. Usage: Optional for giving a name to a step in the workflow.
+
+**uses: actions/checkout@v3**
+1. `uses:` - This step uses a public action.
+2. `actions/checkout@v3` - Specifies the `checkout` action from the `actions` repository, version 3.
+3. Purpose: To checkout the code from the current repository into the runner so subsequent steps can access it.
+4. Execution: The runner will have the repository's code in its workspace.
+5. Generated files: The repository's files.
+6. Usage: Almost always used if the workflow interacts with the repository's code.
+
+**- run: npm install**
+1. `- run:` - Execute the following command.
+2. `npm install` - Node.js command to install all project dependencies.
+3. Purpose: To install required dependencies for the project.
+4. Execution: Node modules are installed.
+5. Generated files: `node_modules/` directory and possibly updates to `package-lock.json`.
+6. Usage: Required for Node.js projects to install dependencies before running/testing/deploying.
+
+### Job: unit-testing
+
+**- run: npm test**
+1. `npm test` - Node.js command to run unit tests.
+2. Purpose: To execute unit tests and ensure code quality.
+3. Execution: Tests are run, and any failures will halt the workflow.
+4. Generated files: None typically, but depends on test configurations.
+5. Usage: To automate testing in the CI process.
+
+### Job: package-audit
+
+**- run: npm audit**
+1. `npm audit` - Node.js command that reviews project dependencies for known vulnerabilities.
+2. Purpose: To identify and alert on security vulnerabilities.
+3. Execution: An audit report is generated.
+4. Generated files: None.
+5. Usage: To maintain security by ensuring dependencies are free of known vulnerabilities.
+
+**uses: snyk/actions/node@master**
+1. Uses the Snyk action, a tool for finding and fixing vulnerabilities in dependencies.
+2. Purpose: Another layer of security scanning.
+3. Execution: Snyk scans the project and might fail the workflow if vulnerabilities are found.
+4. Generated files: None typically, but depends on Snyk configurations.
+5. Usage: To enhance security by ensuring dependencies are free of known vulnerabilities.
+
+### Job: deploy-dev
+
+**args: deploy --stage=dev**
+1. Provides arguments to the `serverless` deployment command to deploy to a `dev` stage.
+2. Purpose: To deploy the serverless application in a development environment.
+3. Execution: Serverless framework deploys the app to a dev stage.
+4. Generated files: None directly, but serverless resources are created/
 
 
  <img src="https://img.shields.io/badge/Ask%20me-anything-1abc9c.svg"/>
