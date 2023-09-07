@@ -18,6 +18,10 @@
 <img src="https://github.com/aadyr/group4-cicd-capstone/blob/dev/Group4-CICD-Diagram.png" />
 
 This defines a human-readable name for the GitHub Action workflow.
+
+This CI/CD workflow is set to run automatically when certain events happen in the GitHub repository. Specifically, it's triggered when code is pushed to the "dev" or "main" branches. These branches are where developers collaborate on code changes.
+
+
 It helps to identify what this particular workflow does at a glance.
 Nothing happens after this; it's a descriptor.
 No files generated.
@@ -58,11 +62,18 @@ needs: Specifies job dependencies, meaning one job won't run until another compl
 steps: These are the individual actions the job will execute.
 pre-deploy:
 
-This job is to display an echo message.
+### Job: pre-deploy
 
-### install-dependencies:
+- When the workflow starts, the first job is called "pre-deploy." It runs on a virtual machine with Ubuntu.
+- In this job, the pipeline simply prints a message indicating that it was triggered by a specific event (like a push to the repository). This step helps us understand why the workflow ran.
 
-This job checks out your repository code and installs npm dependencies.
+
+### Job: install-dependencies
+
+- After the pre-deploy job, the pipeline moves to "install-dependencies."
+-  This job checks out the code from the repository and then installs the necessary software libraries or modules (dependencies) required for the application to work. It uses Node.js and the npm package manager for this.
+- Automation here is crucial because it ensures that the right dependencies are installed without manual intervention.
+
 
 ```yml
   install-dependencies:
@@ -74,11 +85,11 @@ This job checks out your repository code and installs npm dependencies.
       - name: Run installation of dependencies commands
         run: npm install
 ```
+### Job: unit-testing
 
-
-### unit-testing:
-
-It checks out the repository, installs dependencies, and then runs unit tests.
+- Once the dependencies are installed, the workflow proceeds to "unit-testing."
+-  In this job, it checks out the code again, installs dependencies one more time (just to be sure), and then runs unit tests to make sure that the code behaves as expected.
+-   Automating unit tests ensures code quality and prevents issues from being deployed.
 
 ```yml
 unit-testing:
@@ -93,10 +104,12 @@ unit-testing:
         run: npm test
 ```
 
-### package-audit:
 
+### Job: package-audit
 
-It checks for vulnerabilities in the npm packages and uses Snyk to monitor and report them.
+- The next job is "package-audit."
+- It checks out the code, installs dependencies, and then performs a security audit on those dependencies to find and report any known vulnerabilities.
+- Security is crucial for any application, and automating security checks helps catch vulnerabilities early.
 
 ```yml
  package-audit:
@@ -149,15 +162,11 @@ jobs:
           command: monitor
 ```
 
-### deploy-dev:
+### Job: deploy-dev:
 
-This job does the following:
-
-Checks out the repository.
-Sets up the desired Node.js version.
-Installs npm dependencies.
-Deploys the serverless application to a 'dev' environment.
-Pauses the workflow for 60 seconds to allow the AWS Lambda function to deploy.
+- If all the previous jobs are successful, we move on to "deploy-dev."
+- This job checks out the code, sets up Node.js, installs dependencies, and then deploys the application to a development environment using the Serverless Framework.
+- Automation ensures that code changes are automatically deployed to the dev environment, reducing manual effort.
 
 ```yml
  deploy-dev:
@@ -183,7 +192,9 @@ Pauses the workflow for 60 seconds to allow the AWS Lambda function to deploy.
 
 ### zap_scan:
 
-It displays an API Gateway URL and scans a hardcoded target using OWASP ZAP, a tool for finding vulnerabilities in web apps.
+- After deployment, we have a job called "zap_scan."
+- This job shows the API Gateway URL (a web service endpoint) and then performs an OWASP security scan on the deployed application.
+- Again, automation is important for security checks, as it helps identify vulnerabilities in the running application.
 
 ```yml
  zap_scan:
@@ -198,10 +209,13 @@ It displays an API Gateway URL and scans a hardcoded target using OWASP ZAP, a t
         with:
           target: https://9w2itn60t2.execute-api.ap-southeast-1.amazonaws.com
 ```
+# add the artif here and screenshoot
 
 ### merge:
 
-This job merges the 'dev' branch to 'main'.
+- If all previous jobs succeed, we move to "merge."
+- This job checks out the code, and if everything looks good, it merges the changes from the "dev" branch into the "main" branch.
+- Automation here ensures that code changes from development are smoothly integrated into the production branch.
 
 ```yml
   merge:
@@ -220,24 +234,9 @@ This job merges the 'dev' branch to 'main'.
 
 ### deploy-production:
 
-This job:
-
-Checks out the 'main' branch.
-Sets up Node.js.
-Installs npm dependencies.
-Deploys the serverless application to a 'prod' environment.
-For each of the above jobs:
-
-The structure, as explained, describes the job's actions.
-Jobs perform different tasks, from unit testing to deployment.
-After each job, the next one (based on the 'needs' key) will run.
-GitHub Actions maintains a log of each job. No specific new files are generated unless the job itself is designed to create files.
-Use jobs to structure your CI/CD process in a logical and sequential manner.
-Finally, many steps utilize the "uses:" key to refer to pre-built actions available in the GitHub marketplace. For example, "actions/checkout@v3" is a common action to checkout your code from the repository. Other actions like "serverless/github-action@v3.2" are specialized for specific tasks—in this case, deploying serverless applications.
-
-The ${{ }} syntax is used for expressions in GitHub Actions, allowing for dynamic values, such as secrets, to be used. For instance, ${{ secrets.AWS_ACCESS_KEY_ID }} retrieves the AWS_ACCESS_KEY_ID from the repository's secrets, ensuring sensitive data isn't hard-coded or exposed.
-
-This entire workflow seems designed for a serverless Node.js application. It sets up CI/CD, deploying to a development environment, performing scans, merging to the main branch, and deploying to production. Use such workflows to automate your deployment process and maintain code quality for serverless applications.
+- Finally, we have "deploy-production," which deploys the application to a production environment. This job is triggered when changes are merged into the "main" branch.
+- It checks out the code, sets up Node.js, installs dependencies, and deploys the application to a production environment.
+- Automation guarantees that code is consistently deployed to the production environment when it's ready.
 
 ``` yml
 deploy-prod: #using new IAM user as g4p
@@ -263,148 +262,8 @@ deploy-prod: #using new IAM user as g4p
              AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 ```
 
-Last Line
 
-
-### Global Configuration
-
-**name: CICD for Serverless Application**
-1. `name:` - Declares a key in YAML. This is the name of your workflow.
-2. `CICD for Serverless Application` - This is the name of the workflow.
-3. Purpose: To give a descriptive name for the workflow.
-4. Execution: None, it's a descriptor.
-5. Generated files: None.
-6. Usage: To define the name of a workflow that appears in the GitHub Actions UI.
-
-**run-name: ${{ github.actor }} is doing CICD for serverless application**
-1. `run-name:` - Specifies the name of each individual run of the workflow.
-2. `${{ github.actor }}` - Refers to the username of the person who initiated the event triggering this action.
-3. Purpose: To provide a specific name for individual workflow runs.
-4. Execution: Each run will have a name like "user123 is doing CICD for serverless application."
-5. Generated files: None.
-6. Usage: For better logging and identification of workflow runs.
-
-### Event Triggers
-
-**on:**
-1. `on:` - Declares the events that will trigger the workflow.
-2. Purpose: To specify when this workflow should run.
-3. Execution: Workflow waits for the specified event.
-4. Generated files: None.
-5. Usage: To define the events that will initiate the workflow.
-
-**push:**
-1. `push:` - An event that triggers when commits are pushed.
-2. Purpose: To initiate the workflow on a push event.
-3. Execution: Workflow triggers when there's a push to the specified branches.
-4. Generated files: None.
-5. Usage: Commonly used to initiate workflows upon code pushes.
-
-**branches: [dev, main]**
-1. `branches:` - Specifies which branches this event applies to.
-2. `[dev, main]` - Only triggers for `dev` and `main` branches.
-3. Purpose: To narrow down the push event to specific branches.
-4. Execution: Workflow will start if a push event happens on either `dev` or `main` branches.
-5. Generated files: None.
-6. Usage: To selectively run workflows for specific branches.
-
-### Job Definitions
-
-Note: The pattern here is repetitive for each job. Each job has `runs-on`, which defines the type of runner the job will execute on. `steps` then define a series of commands/actions the job will perform.
-
-**jobs:**
-1. `jobs:` - Begins the definition of all jobs in the workflow.
-2. Purpose: To group and list all the jobs for the workflow.
-3. Execution: None, it's a structure.
-4. Generated files: None.
-5. Usage: Always used in GitHub Actions to define the set of jobs.
-
-**pre-deploy:**
-1. `pre-deploy:` - Name of the job.
-2. Purpose: To define a specific job with its steps.
-3. Execution: None yet, it's a descriptor.
-4. Generated files: None.
-5. Usage: Each job in a workflow is named, and this is the name of this job.
-
-**runs-on: ubuntu-latest**
-1. `runs-on:` - Specifies where the job runs.
-2. `ubuntu-latest` - The latest version of the Ubuntu runner.
-3. Purpose: To define which type of runner to use.
-4. Execution: The job will use an Ubuntu virtual machine.
-5. Generated files: None.
-6. Usage: To specify the environment where the job will be executed.
-
-(For brevity, I will cover unique steps, and not repeat explanations for shared steps.)
-
-### Job: pre-deploy
-
-**- run: echo "The job is automatically triggered by a ${{ github.event_name }} event."**
-1. `- run:` - Executes the following shell command.
-2. `echo` - Shell command to print something.
-3. `${{ github.event_name }}` - Dynamic value that provides the name of the event that triggered the workflow.
-4. Purpose: To print a message telling which event triggered this job.
-5. Execution: The message is displayed in the workflow logs.
-6. Generated files: None.
-7. Usage: For logging/debugging purposes.
-
-### Job: install-dependencies
-
-**- name: Check out repository code**
-1. `- name:` - Provides a friendly name for the following step.
-2. `Check out repository code` - A human-readable name for this step.
-3. Purpose: To describe the step for better logging/visibility.
-4. Execution: None, it's a descriptor.
-5. Generated files: None.
-6. Usage: Optional for giving a name to a step in the workflow.
-
-**uses: actions/checkout@v3**
-1. `uses:` - This step uses a public action.
-2. `actions/checkout@v3` - Specifies the `checkout` action from the `actions` repository, version 3.
-3. Purpose: To checkout the code from the current repository into the runner so subsequent steps can access it.
-4. Execution: The runner will have the repository's code in its workspace.
-5. Generated files: The repository's files.
-6. Usage: Almost always used if the workflow interacts with the repository's code.
-
-**- run: npm install**
-1. `- run:` - Execute the following command.
-2. `npm install` - Node.js command to install all project dependencies.
-3. Purpose: To install required dependencies for the project.
-4. Execution: Node modules are installed.
-5. Generated files: `node_modules/` directory and possibly updates to `package-lock.json`.
-6. Usage: Required for Node.js projects to install dependencies before running/testing/deploying.
-
-### Job: unit-testing
-
-**- run: npm test**
-1. `npm test` - Node.js command to run unit tests.
-2. Purpose: To execute unit tests and ensure code quality.
-3. Execution: Tests are run, and any failures will halt the workflow.
-4. Generated files: None typically, but depends on test configurations.
-5. Usage: To automate testing in the CI process.
-
-### Job: package-audit
-
-**- run: npm audit**
-1. `npm audit` - Node.js command that reviews project dependencies for known vulnerabilities.
-2. Purpose: To identify and alert on security vulnerabilities.
-3. Execution: An audit report is generated.
-4. Generated files: None.
-5. Usage: To maintain security by ensuring dependencies are free of known vulnerabilities.
-
-**uses: snyk/actions/node@master**
-1. Uses the Snyk action, a tool for finding and fixing vulnerabilities in dependencies.
-2. Purpose: Another layer of security scanning.
-3. Execution: Snyk scans the project and might fail the workflow if vulnerabilities are found.
-4. Generated files: None typically, but depends on Snyk configurations.
-5. Usage: To enhance security by ensuring dependencies are free of known vulnerabilities.
-
-### Job: deploy-dev
-
-**args: deploy --stage=dev**
-1. Provides arguments to the `serverless` deployment command to deploy to a `dev` stage.
-2. Purpose: To deploy the serverless application in a development environment.
-3. Execution: Serverless framework deploys the app to a dev stage.
-4. Generated files: None directly, but serverless resources are created/
+In summary, this CI/CD pipeline automates the process of building, testing, securing, and deploying a Serverless Application. Automation ensures that code changes are thoroughly tested, secure, and reliably deployed, reducing manual effort and human error. It's a crucial part of modern software development to maintain code quality and security.
 
 
  <img src="https://img.shields.io/badge/Ask%20me-anything-1abc9c.svg"/>
