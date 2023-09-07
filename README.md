@@ -265,5 +265,9 @@ deploy-prod: #using new IAM user as g4p
 
 In summary, this CI/CD pipeline automates the process of building, testing, securing, and deploying a Serverless Application. Automation ensures that code changes are thoroughly tested, secure, and reliably deployed, reducing manual effort and human error. It's a crucial part of modern software development to maintain code quality and security.
 
+<img src="https://github.com/aadyr/group4-cicd-capstone/blob/dev/Github_branches.png">
+
+
+
 
  <img src="https://img.shields.io/badge/Ask%20me-anything-1abc9c.svg"/>
