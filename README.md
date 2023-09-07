@@ -59,14 +59,58 @@ This job is to display an echo message.
 
 This job checks out your repository code and installs npm dependencies.
 
+```yml
+  install-dependencies:
+    runs-on: ubuntu-latest
+    needs: pre-deploy
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Run installation of dependencies commands
+        run: npm install
+```
+
+
 ### unit-testing:
 
 It checks out the repository, installs dependencies, and then runs unit tests.
+
+```yml
+unit-testing:
+    runs-on: ubuntu-latest
+    needs: install-dependencies
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Run installation of dependencies commands
+        run: npm install # all the module require is in package.json
+      - name: Run unit testing commands
+        run: npm test
+```
 
 ### package-audit:
 
 
 It checks for vulnerabilities in the npm packages and uses Snyk to monitor and report them.
+
+```yml
+ package-audit:
+    runs-on: ubuntu-latest
+    needs: unit-testing
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Run installation of dependencies commands
+        run: npm install # all the module require is in package.json
+      - name: Run unit testing commands
+        run: npm audit
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        env:
+         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+         command: monitor
+```
 
 #### Adding Synk to CICD pipeline for vulnerability scanning and monitoring
 
@@ -83,6 +127,7 @@ In your Snyk account, generate an API token. This token will be used in GitHub A
 In your GitHub repository, go to "Settings" > "Secrets" > "New repository secret" and add a secret named SNYK_TOKEN with the value being your Snyk API token.
 
 5) add below code to your workflow
+
 ```yml
 name: Example workflow using Snyk
 on: push
@@ -108,13 +153,65 @@ Sets up the desired Node.js version.
 Installs npm dependencies.
 Deploys the serverless application to a 'dev' environment.
 Pauses the workflow for 60 seconds to allow the AWS Lambda function to deploy.
+
+```yml
+ deploy-dev:
+    runs-on: ubuntu-latest
+    needs: package-audit
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+         node-version: ${{ matrix.node-version }}
+      - run: npm ci
+      - name: serverless deploy
+        uses: serverless/github-action@v3.2
+        with:
+          args: deploy --stage=dev
+        env:
+             AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
+             AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Sleep for 60 seconds #wait for lambda to be deploy
+        run: sleep 60
+```
+
 ### zap_scan:
 
 It displays an API Gateway URL and scans a hardcoded target using OWASP ZAP, a tool for finding vulnerabilities in web apps.
 
+```yml
+ zap_scan:
+    runs-on: ubuntu-latest
+    needs: deploy-dev
+    name: OWASP Scan the webapplication
+    steps:
+      - name: Show API Gateway URL
+        run: echo "API_Gateway_URL:" $api_gateway_url 
+      - name: ZAP Scan
+        uses: zaproxy/action-api-scan@v0.5.0
+        with:
+          target: https://9w2itn60t2.execute-api.ap-southeast-1.amazonaws.com
+```
+
 ### merge:
 
 This job merges the 'dev' branch to 'main'.
+
+```yml
+  merge:
+    runs-on: ubuntu-latest
+    needs: [zap_scan]
+    steps:
+      - uses: actions/checkout@master
+      - name: Merge dev -> Main
+        uses: devmasx/merge-branch@v1.4.0
+        with:
+          type: now
+          target_branch: main
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+```
 
 ### deploy-production:
 
@@ -137,6 +234,29 @@ The ${{ }} syntax is used for expressions in GitHub Actions, allowing for dynami
 
 This entire workflow seems designed for a serverless Node.js application. It sets up CI/CD, deploying to a development environment, performing scans, merging to the main branch, and deploying to production. Use such workflows to automate your deployment process and maintain code quality for serverless applications.
 
+``` yml
+deploy-prod: #using new IAM user as g4p
+    runs-on: ubuntu-latest
+    needs: merge
+    steps:
+      - uses: actions/checkout@v3
+        with:
+         ref: refs/heads/main
+      - run: git checkout main  
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+         node-version: ${{ matrix.node-version }}
+      - run: npm ci
+      - name: serverless deploy
+        uses: serverless/github-action@v3.2
+        with:
+          args: deploy --stage=prod
+        env:
+             AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
+             AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+```
 
 
 
