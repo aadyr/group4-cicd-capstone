@@ -17,50 +17,10 @@
 
 <img src="https://github.com/aadyr/group4-cicd-capstone/blob/dev/Group4-CICD-Diagram.png" />
 
-This defines a human-readable name for the GitHub Action workflow.
 
 This CI/CD workflow is set to run automatically when certain events happen in the GitHub repository. Specifically, it's triggered when code is pushed to the "dev" or "main" branches. These branches are where developers collaborate on code changes.
 
 
-It helps to identify what this particular workflow does at a glance.
-Nothing happens after this; it's a descriptor.
-No files generated.
-Use this to give a meaningful name to your GitHub Actions workflow.
-run-name: ${{ github.actor }} is doing CICD for serverless application
-
-This line determines the run's name and will display the name of the actor (usually the person or bot) executing the action followed by the message.
-Helps to identify who triggered the action.
-Nothing happens after this.
-No files generated.
-Use this to customize the run's display name.
-on:
-
-This keyword defines which GitHub events this workflow will react to.
-It sets the criteria to initiate the actions.
-Checks for the event configurations that follow.
-No files generated.
-Use this to define when the workflow should be triggered.
-push:
-branches: [ dev , main]
-
-This action will be triggered on a push event specifically on 'dev' and 'main' branches.
-Ensures that workflow runs only for the specified branches.
-GitHub Actions waits for a push to the specified branches.
-No files generated.
-When you want to trigger workflows only for specific branches.
-jobs:
-
-Here you're defining the collection of jobs to run.
-It's the beginning of the workflow logic.
-GitHub Actions expects individual job definitions next.
-No files generated.
-Use this when laying out the various steps/tasks in your workflow.
-Now, for each job, the structure is similar:
-
-runs-on: This is where the job will execute. For this workflow, all jobs run on the latest version of Ubuntu.
-needs: Specifies job dependencies, meaning one job won't run until another completes.
-steps: These are the individual actions the job will execute.
-pre-deploy:
 
 ### Job: pre-deploy
 
