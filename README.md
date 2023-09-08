@@ -21,12 +21,39 @@
 This CI/CD workflow is set to run automatically when certain events happen in the GitHub repository. Specifically, it's triggered when code is pushed to the "dev" or "main" branches. These branches are where developers collaborate on code changes.
 
 
+  
+### Branching strategy
 
-### Job: pre-deploy
+ In our branching strategy, we prioritize both the stability of our codebase and the flexibility for developers to work efficiently. To achieve this balance, we've set up specific protections on our 'dev' and 'main' branches. 'Dev' serves as our default branch, reflecting the ongoing development work. All developers are encouraged to create their feature branches from 'dev,' allowing them to work on their respective features independently.
 
+Here's where our CI/CD pipeline plays a crucial role. We've configured it to automatically trigger when a 'push' command is issued, but with one important condition: all jobs in the GitHub Actions workflow must pass successfully. This meticulous approach ensures that no unverified code enters our main branch.
+
+The 'main' branch, on the other hand, remains protected, serving as a stable and production-ready version of our software. Only when the conditions are met—successful job completions in our workflow—will 'dev' be allowed to merge into 'main.' This way, we maintain code quality and minimize the risk of introducing bugs or issues into our production environment.
+
+By safeguarding 'dev' and 'main' and implementing this trigger-based merging approach, we strike a harmonious balance between development agility and code reliability in our branching strategy.
+
+ <img src="https://github.com/aadyr/group4-cicd-capstone/blob/dev/Github_branches.png" />
+
+
+
+### On Event Tigger & Job: Pre-deploy
+
+- The Github action workflow would tigger upon a push command
 - When the workflow starts, the first job is called "pre-deploy." It runs on a virtual machine with Ubuntu.
 - In this job, the pipeline simply prints a message indicating that it was triggered by a specific event (like a push to the repository). This step helps us understand why the workflow ran.
+<details>
+```yml
+on:
+  push:
+    branches: [dev, main]
 
+jobs:
+  pre-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "The job is automatically triggered by a ${{ github.event_name }} event."
+```
+</details>
 
 ### Job: install-dependencies
 
@@ -34,6 +61,7 @@ This CI/CD workflow is set to run automatically when certain events happen in th
 -  This job checks out the code from the repository and then installs the necessary software libraries or modules (dependencies) required for the application to work. It uses Node.js and the npm package manager for this.
 - Automation here is crucial because it ensures that the right dependencies are installed without manual intervention.
 
+<details>
 
 ```yml
   install-dependencies:
@@ -45,11 +73,15 @@ This CI/CD workflow is set to run automatically when certain events happen in th
       - name: Run installation of dependencies commands
         run: npm install
 ```
+</details>
+
 ### Job: unit-testing
 
 - Once the dependencies are installed, the workflow proceeds to "unit-testing."
 -  In this job, it checks out the code again, installs dependencies one more time (just to be sure), and then runs unit tests to make sure that the code behaves as expected.
 -   Automating unit tests ensures code quality and prevents issues from being deployed.
+
+<details>
 
 ```yml
 unit-testing:
@@ -63,13 +95,15 @@ unit-testing:
       - name: Run unit testing commands
         run: npm test
 ```
-
+</details>
 
 ### Job: package-audit
 
 - The next job is "package-audit."
 - It checks out the code, installs dependencies, and then performs a security audit on those dependencies to find and report any known vulnerabilities.
 - Security is crucial for any application, and automating security checks helps catch vulnerabilities early.
+
+<details> 
 
 ```yml
  package-audit:
@@ -89,7 +123,7 @@ unit-testing:
         with:
          command: monitor
 ```
-<details> 
+
 
  <img src="https://github.com/aadyr/group4-cicd-capstone/blob/dev/synk_scan.png"/>
   
@@ -132,6 +166,8 @@ jobs:
 - This job checks out the code, sets up Node.js, installs dependencies, and then deploys the application to a development environment using the Serverless Framework.
 - Automation ensures that code changes are automatically deployed to the dev environment, reducing manual effort.
 
+<details>
+
 ```yml
  deploy-dev:
     runs-on: ubuntu-latest
@@ -154,11 +190,16 @@ jobs:
         run: sleep 60
 ```
 
+</details>
+
+
 ### zap_scan:
 
 - After deployment, we have a job called "zap_scan."
 - This job shows the API Gateway URL (a web service endpoint) and then performs an OWASP security scan on the deployed application.
 - Again, automation is important for security checks, as it helps identify vulnerabilities in the running application.
+
+<details>
 
 ```yml
  zap_scan:
@@ -173,7 +214,7 @@ jobs:
         with:
           target: https://9w2itn60t2.execute-api.ap-southeast-1.amazonaws.com
 ```
-<details>
+
 https://github.com/aadyr/group4-cicd-capstone/blob/dev/zap_scan.png
 </details>
 
@@ -182,6 +223,8 @@ https://github.com/aadyr/group4-cicd-capstone/blob/dev/zap_scan.png
 - If all previous jobs succeed, we move to "merge."
 - This job checks out the code, and if everything looks good, it merges the changes from the "dev" branch into the "main" branch.
 - Automation here ensures that code changes from development are smoothly integrated into the production branch.
+
+<details>
 
 ```yml
   merge:
@@ -197,6 +240,7 @@ https://github.com/aadyr/group4-cicd-capstone/blob/dev/zap_scan.png
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
 ```
+</details>
 
 ### deploy-production:
 
@@ -204,6 +248,7 @@ https://github.com/aadyr/group4-cicd-capstone/blob/dev/zap_scan.png
 - It checks out the code, sets up Node.js, installs dependencies, and deploys the application to a production environment.
 - Automation guarantees that code is consistently deployed to the production environment when it's ready.
 
+<details>
 ``` yml
 deploy-prod: #using new IAM user as g4p
     runs-on: ubuntu-latest
@@ -227,7 +272,7 @@ deploy-prod: #using new IAM user as g4p
              AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
              AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 ```
-
+</details>
 
 In summary, this CI/CD pipeline automates the process of building, testing, securing, and deploying a Serverless Application. Automation ensures that code changes are thoroughly tested, secure, and reliably deployed, reducing manual effort and human error. It's a crucial part of modern software development to maintain code quality and security.
 
@@ -345,11 +390,7 @@ This will securely provide the function with a value from the AWS SSM Parameter 
 
 
 
-<details>
-  
- ![image](https://github.com/aadyr/group4-cicd-capstone/assets/61894953/980c362a-ffb7-4266-b153-b9405f546048)
 
-</details>
 
 
  <img src="https://img.shields.io/badge/Ask%20me-anything-1abc9c.svg"/> 
