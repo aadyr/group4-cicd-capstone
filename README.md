@@ -129,8 +129,11 @@ unit-testing:
         with:
          command: monitor
 ```
+<details> 
 
-#### Adding Synk to CICD pipeline for vulnerability scanning and monitoring
+ <img src="https://github.com/aadyr/group4-cicd-capstone/blob/dev/synk_scan.png"/>
+  
+### Adding Synk to CICD pipeline for vulnerability scanning and monitoring
 
 1) Create a Snyk Account:
 If you don't have a Snyk account, you'll need to create one at https://snyk.io/signup.
@@ -161,6 +164,7 @@ jobs:
         with:
           command: monitor
 ```
+</details>
 
 ### Job: deploy-dev:
 
@@ -209,7 +213,9 @@ jobs:
         with:
           target: https://9w2itn60t2.execute-api.ap-southeast-1.amazonaws.com
 ```
-# add the artif here and screenshoot
+<details>
+https://github.com/aadyr/group4-cicd-capstone/blob/dev/zap_scan.png
+</details>
 
 ### merge:
 
@@ -265,7 +271,9 @@ deploy-prod: #using new IAM user as g4p
 
 In summary, this CI/CD pipeline automates the process of building, testing, securing, and deploying a Serverless Application. Automation ensures that code changes are thoroughly tested, secure, and reliably deployed, reducing manual effort and human error. It's a crucial part of modern software development to maintain code quality and security.
 
+<details>
 <img src="https://github.com/aadyr/group4-cicd-capstone/blob/dev/Github_branches.png">
+</details>
 
 ## Serverless 
 
@@ -279,7 +287,6 @@ It will also craete unique Function names like ```Group4-prod-Capstone``` and ``
 
 
 <details>  
-
 
 ```
 service: Group4
