@@ -40,7 +40,9 @@ By safeguarding 'dev' and 'main' and implementing this trigger-based merging app
 - The Github action workflow would tigger upon a push command
 - When the workflow starts, the first job is called "pre-deploy." It runs on a virtual machine with Ubuntu.
 - In this job, the pipeline simply prints a message indicating that it was triggered by a specific event (like a push to the repository). This step helps us understand why the workflow ran.
+
 <details>
+
 ```yml
 on:
   push:
@@ -54,11 +56,13 @@ jobs:
 ```
 </details>
 
+
 ### Install-dependencies
 
 - After the pre-deploy job, the pipeline moves to "install-dependencies."
 -  This job checks out the code from the repository and then installs the necessary software libraries or modules (dependencies) required for the application to work. It uses Node.js and the npm package manager for this.
 - Automation here is crucial because it ensures that the right dependencies are installed without manual intervention.
+
 
 <details>
 
@@ -72,6 +76,7 @@ jobs:
       - name: Run installation of dependencies commands
         run: npm install
 ```
+
 </details>
 
 ### Unit-testing
@@ -241,7 +246,7 @@ https://github.com/aadyr/group4-cicd-capstone/blob/dev/zap_scan.png
 ```
 </details>
 
-### deploy-production:
+### Deploy-production:
 
 - Finally, we have "deploy-production," which deploys the application to a production environment. This job is triggered when changes are merged into the "main" branch.
 - It checks out the code, sets up Node.js, installs dependencies, and deploys the application to a production environment.
@@ -276,9 +281,9 @@ deploy-prod: #using new IAM user as g4p
 In summary, this CI/CD pipeline automates the process of building, testing, securing, and deploying a Serverless Application. Automation ensures that code changes are thoroughly tested, secure, and reliably deployed, reducing manual effort and human error. It's a crucial part of modern software development to maintain code quality and security.
 
 
-## Serverless 
+### Serverless 
 
-### This section explains the ```serverless.yml``` 
+##### This section explains the ```serverless.yml``` 
 
 This YAML configuration is for the Serverless Framework.  It makes it easy to deploy serverless applications on cloud platforms like AWS.  This configuration would create a AWS Lambda function exposed by an HTTP endpoint, and other related AWS resources like an S3 bucket and an API Gateway.
 
