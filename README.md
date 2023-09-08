@@ -219,7 +219,8 @@ jobs:
           target: https://9w2itn60t2.execute-api.ap-southeast-1.amazonaws.com
 ```
 
-https://github.com/aadyr/group4-cicd-capstone/blob/dev/zap_scan.png
+<img src="https://github.com/aadyr/group4-cicd-capstone/blob/dev/zap_scan.png"/>
+
 </details>
 
 ### Merge
@@ -253,6 +254,7 @@ https://github.com/aadyr/group4-cicd-capstone/blob/dev/zap_scan.png
 - Automation guarantees that code is consistently deployed to the production environment when it's ready.
 
 <details>
+  
 ``` yml
 deploy-prod: #using new IAM user as g4p
     runs-on: ubuntu-latest
