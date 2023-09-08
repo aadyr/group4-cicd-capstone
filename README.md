@@ -384,9 +384,9 @@ This will securely provide the function with a value from the AWS SSM Parameter 
 
 </details>
 
+![McDonald's Badge](https://img.shields.io/badge/McDonald's-FBC817?logo=mcdonalds&logoColor=000&style=for-the-badge)
 
-
-
+ <img src="https://github.com/aadyr/group4-cicd-capstone/blob/dev/qrcode.png"/> 
 
 
  <img src="https://img.shields.io/badge/Ask%20me-anything-1abc9c.svg"/> 
