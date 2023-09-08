@@ -164,7 +164,7 @@ jobs:
 ```
 </details>
 
-### Deploy-dev:
+### Deploy-dev
 
 - If all the previous jobs are successful, we move on to "deploy-dev."
 - This job checks out the code, sets up Node.js, installs dependencies, and then deploys the application to a development environment using the Serverless Framework.
@@ -247,7 +247,7 @@ jobs:
 ```
 </details>
 
-### Deploy-production:
+### Deploy-production
 
 - Finally, we have "deploy-production," which deploys the application to a production environment. This job is triggered when changes are merged into the "main" branch.
 - It checks out the code, sets up Node.js, installs dependencies, and deploys the application to a production environment.
