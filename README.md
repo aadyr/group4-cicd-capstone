@@ -2,8 +2,7 @@
 
 <img src="https://img.shields.io/badge/Amazon AWS-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white" />   [<img src="](https://github.com/aadyr/group4-cicd-capstone/blob/dev/Group4-CICD-Diagram.png)https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white" />  <img src="https://img.shields.io/badge/Visual_Studio_Code-0078D4?style=for-the-badge&logo=visual%20studio%20code&logoColor=white" />     <img src="https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white"/>
 <img src="https://img.shields.io/badge/Snyk-4C4A73?style=for-the-badge&logo=snyk&logoColor=white"/>
-![Serverless Badge](https://img.shields.io/badge/Serverless-FD5750?logo=serverless&logoColor=fff&style=for-the-badge) ![OWASP Badge](https://img.shields.io/badge/OWASP-000?logo=owasp&logoColor=fff&style=for-the-badge) ![Node.js Badge](https://img.shields.io/badge/Node.js-393?logo=nodedotjs&logoColor=fff&style=for-the-badge) ![AWS Lambda Badge](https://img.shields.io/badge/AWS%20Lambda-F90?logo=awslambda&logoColor=fff&style=for-the-badge) ![Amazon API Gateway Badge](https://img.shields.io/badge/Amazon%20API%20Gateway-FF4F8B?logo=amazonapigateway&logoColor=fff&style=for-the-badge) ![Microsoft Badge](https://img.shields.io/badge/Microsoft-5E5E5E?logo=microsoft&logoColor=fff&style=for-the-badge)
-![Apple Badge](https://img.shields.io/badge/Apple-000?logo=apple&logoColor=fff&style=for-the-badge)
+![Serverless Badge](https://img.shields.io/badge/Serverless-FD5750?logo=serverless&logoColor=fff&style=for-the-badge) ![OWASP Badge](https://img.shields.io/badge/OWASP-000?logo=owasp&logoColor=fff&style=for-the-badge) ![Node.js Badge](https://img.shields.io/badge/Node.js-393?logo=nodedotjs&logoColor=fff&style=for-the-badge) ![AWS Lambda Badge](https://img.shields.io/badge/AWS%20Lambda-F90?logo=awslambda&logoColor=fff&style=for-the-badge) ![Amazon API Gateway Badge](https://img.shields.io/badge/Amazon%20API%20Gateway-FF4F8B?logo=amazonapigateway&logoColor=fff&style=for-the-badge) ![macOS Badge](https://img.shields.io/badge/macOS-000?logo=macos&logoColor=fff&style=for-the-badge) ![Windows Badge](https://img.shields.io/badge/Windows-0078D4?logo=windows&logoColor=fff&style=for-the-badge)
 
 
 <p align="center">
@@ -24,11 +23,11 @@ This CI/CD workflow is set to run automatically when certain events happen in th
   
 ### Branching strategy
 
- In our branching strategy, we prioritize both the stability of our codebase and the flexibility for developers to work efficiently. To achieve this balance, we've set up specific protections on our 'dev' and 'main' branches. 'Dev' serves as our default branch, reflecting the ongoing development work. All developers are encouraged to create their feature branches from 'dev,' allowing them to work on their respective features independently.
+ In our branching strategy, we prioritize both the stability of our codebase and the flexibility for developers to work efficiently. To achieve this balance, we've set up specific protections on our 'dev' and 'main' branches. 'Dev' serves as our default branch, reflecting the ongoing development work. All developers are to create their feature branches from 'dev,' only, allowing them to work on their respective features independently.
 
 Here's where our CI/CD pipeline plays a crucial role. We've configured it to automatically trigger when a 'push' command is issued, but with one important condition: all jobs in the GitHub Actions workflow must pass successfully. This meticulous approach ensures that no unverified code enters our main branch.
 
-The 'main' branch, on the other hand, remains protected, serving as a stable and production-ready version of our software. Only when the conditions are met—successful job completions in our workflow—will 'dev' be allowed to merge into 'main.' This way, we maintain code quality and minimize the risk of introducing bugs or issues into our production environment.
+The 'main' branch, on the other hand, remains protected, serving as a stable and production-ready version of our software/applicantion/API. Only when the conditions are met successfully (job completions) in our workflow, will 'dev' be allowed to merge into 'main.' This way, we maintain code quality and minimize the risk of introducing bugs or issues into our production environment.
 
 By safeguarding 'dev' and 'main' and implementing this trigger-based merging approach, we strike a harmonious balance between development agility and code reliability in our branching strategy.
 
@@ -36,7 +35,7 @@ By safeguarding 'dev' and 'main' and implementing this trigger-based merging app
 
 
 
-### On Event Tigger & Job: Pre-deploy
+### On Event Tigger & Pre-deploy
 
 - The Github action workflow would tigger upon a push command
 - When the workflow starts, the first job is called "pre-deploy." It runs on a virtual machine with Ubuntu.
@@ -55,7 +54,7 @@ jobs:
 ```
 </details>
 
-### Job: install-dependencies
+### Install-dependencies
 
 - After the pre-deploy job, the pipeline moves to "install-dependencies."
 -  This job checks out the code from the repository and then installs the necessary software libraries or modules (dependencies) required for the application to work. It uses Node.js and the npm package manager for this.
@@ -75,7 +74,7 @@ jobs:
 ```
 </details>
 
-### Job: unit-testing
+### Unit-testing
 
 - Once the dependencies are installed, the workflow proceeds to "unit-testing."
 -  In this job, it checks out the code again, installs dependencies one more time (just to be sure), and then runs unit tests to make sure that the code behaves as expected.
@@ -97,7 +96,7 @@ unit-testing:
 ```
 </details>
 
-### Job: package-audit
+### Package-Audit
 
 - The next job is "package-audit."
 - It checks out the code, installs dependencies, and then performs a security audit on those dependencies to find and report any known vulnerabilities.
@@ -160,7 +159,7 @@ jobs:
 ```
 </details>
 
-### Job: deploy-dev:
+### Deploy-dev:
 
 - If all the previous jobs are successful, we move on to "deploy-dev."
 - This job checks out the code, sets up Node.js, installs dependencies, and then deploys the application to a development environment using the Serverless Framework.
@@ -193,7 +192,7 @@ jobs:
 </details>
 
 
-### zap_scan:
+### Zap Scan Api
 
 - After deployment, we have a job called "zap_scan."
 - This job shows the API Gateway URL (a web service endpoint) and then performs an OWASP security scan on the deployed application.
@@ -218,7 +217,7 @@ jobs:
 https://github.com/aadyr/group4-cicd-capstone/blob/dev/zap_scan.png
 </details>
 
-### merge:
+### Merge
 
 - If all previous jobs succeed, we move to "merge."
 - This job checks out the code, and if everything looks good, it merges the changes from the "dev" branch into the "main" branch.
@@ -276,9 +275,6 @@ deploy-prod: #using new IAM user as g4p
 
 In summary, this CI/CD pipeline automates the process of building, testing, securing, and deploying a Serverless Application. Automation ensures that code changes are thoroughly tested, secure, and reliably deployed, reducing manual effort and human error. It's a crucial part of modern software development to maintain code quality and security.
 
-<details>
-<img src="https://github.com/aadyr/group4-cicd-capstone/blob/dev/Github_branches.png">
-</details>
 
 ## Serverless 
 
